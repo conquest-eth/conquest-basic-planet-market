@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import {SpaceshipsForSale, SaleCancelled} from '../generated/BasicSpaceshipMarket/BasicSpaceshipMarketContract';
+import {SpaceshipsForSale, SaleCancelled} from '../generated/BasicPlanetMarket/BasicPlanetMarketContract';
 import {FleetArrived, ExitComplete} from '../generated/OuterSpace/OuterSpaceContract';
 import {SpaceshipSale} from '../generated/schema';
 import {store, BigInt} from '@graphprotocol/graph-ts';

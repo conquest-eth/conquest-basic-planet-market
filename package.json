@@ -1,7 +1,7 @@
 {
-  "name": "spaceship-market",
+  "name": "planet-market",
   "version": "0.0.1",
-  "description": "Spaceship Market",
+  "description": "Planet Market",
   "private": true,
   "devDependencies": {
     "change-name": "^0.2.6",
@@ -19,8 +19,8 @@
     "preinstall": "npx only-allow pnpm",
     "---------------------- setup ----------------------": "",
     "prepare": "node ./.setup.js",
-    "boot": "npx change-name spaceship-market && pnpm install",
-    "set-name": "npx change-name spaceship-market",
+    "boot": "npx change-name planet-market && pnpm install",
+    "set-name": "npx change-name planet-market",
     "---------------------- common lib ----------------------": "compile the common library",
     "common:dev": "npm --prefix common-lib run dev",
     "common:build": "npm --prefix common-lib run build",

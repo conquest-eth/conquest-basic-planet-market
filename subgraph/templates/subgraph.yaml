@@ -1,15 +1,15 @@
 specVersion: 0.0.3
-description: Basic Spaceship Market
+description: Basic Planet Market
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: BasicSpaceshipMarket
+    name: BasicPlanetMarket
     network: {{chainName}}
     source:
-      address: '{{contracts.BasicSpaceshipMarket.address}}'
-      abi: BasicSpaceshipMarketContract
-      startBlock: {{contracts.BasicSpaceshipMarket.receipt.blockNumber}}
+      address: '{{contracts.BasicPlanetMarket.address}}'
+      abi: BasicPlanetMarketContract
+      startBlock: {{contracts.BasicPlanetMarket.receipt.blockNumber}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -17,8 +17,8 @@ dataSources:
       entities:
         - SpaceshipSale
       abis:
-        - name: BasicSpaceshipMarketContract
-          file: ./abis/BasicSpaceshipMarket.json
+        - name: BasicPlanetMarketContract
+          file: ./abis/BasicPlanetMarket.json
       eventHandlers:
         - event: SpaceshipsForSale(indexed uint256,indexed address,uint256,uint256)
           handler: handleSpaceshipsForSale

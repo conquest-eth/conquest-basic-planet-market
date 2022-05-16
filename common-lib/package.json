@@ -1,5 +1,5 @@
 {
-  "name": "spaceship-market-common",
+  "name": "planet-market-common",
   "description": "common library used by other modules",
   "private": true,
   "version": "0.0.1",

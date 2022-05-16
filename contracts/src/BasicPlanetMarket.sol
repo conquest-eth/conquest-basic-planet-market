@@ -4,7 +4,7 @@ pragma solidity 0.8.9;
 import "./outerspace/interfaces/IOuterSpace.sol";
 import "./outerspace/interfaces/IApprovalReceiver.sol";
 
-contract BasicSpaceshipMarket is IApprovalReceiver {
+contract BasicPlanetMarket is IApprovalReceiver {
     event SpaceshipsForSale(
         uint256 indexed location,
         address indexed owner,

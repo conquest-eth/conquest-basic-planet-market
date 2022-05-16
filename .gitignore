@@ -2,4 +2,4 @@
 !.env*.default
 .newsh.json
 node_modules
-spaceship-market.code-workspace
+planet-market.code-workspace

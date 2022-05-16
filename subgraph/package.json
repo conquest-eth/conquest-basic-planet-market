@@ -1,6 +1,6 @@
 {
-  "name": "spaceship-market-subgraph",
-  "description": "Subgraph (thegraph.com) for Spaceship Market",
+  "name": "planet-market-subgraph",
+  "description": "Subgraph (thegraph.com) for Planet Market",
   "private": true,
   "version": "0.0.1",
   "devDependencies": {

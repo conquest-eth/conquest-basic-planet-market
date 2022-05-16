@@ -80,7 +80,7 @@ importers:
       solhint: ^3.3.6
       solhint-plugin-prettier: ^0.0.5
       solidity-coverage: ^0.7.18
-      spaceship-market-common: workspace:*
+      planet-market-common: workspace:*
       ts-generator: ^0.1.1
       ts-node: ^10.4.0
       typechain: ^7.0.0
@@ -114,7 +114,7 @@ importers:
       solhint: 3.3.6
       solhint-plugin-prettier: 0.0.5_1c1557892bfe35086b1a76384ba83b44
       solidity-coverage: 0.7.18
-      spaceship-market-common: link:../common-lib
+      planet-market-common: link:../common-lib
       ts-generator: 0.1.1
       ts-node: 10.4.0_2659dc6620f2255efe6a8f122d014e4b
       typechain: 7.0.0_typescript@4.5.5
@@ -182,7 +182,7 @@ importers:
       prepare-for-web: ^0.1.7
       prettier: ~2.5.1
       prettier-plugin-svelte: ^2.5.1
-      spaceship-market-common: workspace:*
+      planet-market-common: workspace:*
       svelte: ^3.44.3
       svelte-preprocess: ^4.10.1
       sveltejs-adapter-ipfs: 0.2.0
@@ -234,7 +234,7 @@ importers:
       prepare-for-web: 0.1.7
       prettier: 2.5.1
       prettier-plugin-svelte: 2.5.1_prettier@2.5.1+svelte@3.44.3
-      spaceship-market-common: link:../common-lib
+      planet-market-common: link:../common-lib
       svelte: 3.44.3
       svelte-preprocess: 4.10.1_54371e0c17f4c0f646f1b2d2264b5af0
       sveltejs-adapter-ipfs: 0.2.0

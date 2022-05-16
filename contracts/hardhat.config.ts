@@ -91,7 +91,7 @@ const config: HardhatUserConfig = {
     : undefined,
 
   tenderly: {
-    project: 'spaceship-market',
+    project: 'planet-market',
     username: process.env.TENDERLY_USERNAME as string,
   },
 };

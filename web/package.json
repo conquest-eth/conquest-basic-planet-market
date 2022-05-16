@@ -1,5 +1,5 @@
 {
-  "name": "spaceship-market-web",
+  "name": "planet-market-web",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -48,7 +48,7 @@
     "prepare-for-web": "^0.1.7",
     "prettier": "~2.5.1",
     "prettier-plugin-svelte": "^2.5.1",
-    "spaceship-market-common": "workspace:*",
+    "planet-market-common": "workspace:*",
     "svelte": "^3.44.3",
     "svelte-preprocess": "^4.10.1",
     "sveltejs-adapter-ipfs": "0.2.0",
@@ -67,7 +67,7 @@
     "build": "svelte-kit build",
     "start": "svelte-kit start",
     "serve": "ipfs-emulator --only -d build -p 8080",
-    "deploy": "dotenv -- ipfs-deploy -p pinata -s spaceship-market build",
+    "deploy": "dotenv -- ipfs-deploy -p pinata -s planet-market build",
     "build:deploy": "run-s build deploy"
   }
 }

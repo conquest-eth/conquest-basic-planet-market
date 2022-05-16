@@ -22,7 +22,7 @@ function copyFromDefault(p) {
   copyUnlessExists(`${p}.default`, p);
 }
 
-['spaceship-market.code-workspace', '.env', '.env.production', '.env.staging'].map(copyFromDefault);
+['planet-market.code-workspace', '.env', '.env.production', '.env.staging'].map(copyFromDefault);
 
 switch (process.platform) {
   case 'win32':

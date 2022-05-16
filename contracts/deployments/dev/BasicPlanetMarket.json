@@ -239,7 +239,7 @@
               "type": "uint40"
             }
           ],
-          "internalType": "struct BasicSpaceshipMarket.SpaceshipSale[]",
+          "internalType": "struct BasicPlanetMarket.SpaceshipSale[]",
           "name": "sales",
           "type": "tuple[]"
         }
