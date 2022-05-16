@@ -5,23 +5,28 @@ import "./outerspace/interfaces/IOuterSpace.sol";
 import "./outerspace/interfaces/IApprovalReceiver.sol";
 
 contract BasicPlanetMarket is IApprovalReceiver {
-    event SpaceshipsForSale(
-        uint256 indexed location,
+    event PlanetsForSale(
         address indexed owner,
-        uint256 pricePerUnit,
-        uint256 spaceshipsToKeep
+        uint256 id,
+        uint256 price,
+        uint256[] planets,
+        uint256[] minNumSpaceships
     );
-    event SaleCancelled(uint256 indexed location, address indexed owner);
+    event SaleCancelled(uint256 indexed id, address indexed owner);
 
-    event SpaceshipsSold(uint256 indexed location, address indexed fleetOwner, uint256 numSpaceships);
+    event PlanetsSold(uint256 indexed id, address indexed owner, address indexed newOwner);
 
-    struct SpaceshipSale {
-        uint184 pricePerUnit;
-        uint32 spaceshipsToKeep;
-        uint40 timestamp;
+    struct PlanetsSale {
+        address payable seller;
+        uint256 price;
+        uint256[] planets;
+        uint256[] minNumSpaceships;
+        uint256 timestamp;
     }
 
-    mapping(uint256 => SpaceshipSale) internal _sales;
+    mapping(uint256 => PlanetsSale) internal _sales;
+
+    uint256 internal _counter;
 
     IOuterSpace internal immutable _outerspace;
 
@@ -30,72 +35,65 @@ contract BasicPlanetMarket is IApprovalReceiver {
     }
 
     ///@dev useful to get data without any off-chain caching, but does not scale to many locations
-    function getSales(uint256[] calldata locations) external view returns (SpaceshipSale[] memory sales) {
-        sales = new SpaceshipSale[](locations.length);
-        for (uint256 i = 0; i < locations.length; i++) {
-            sales[i] = _sales[locations[i]];
+    function getSales(uint256[] calldata ids) external view returns (PlanetsSale[] memory sales) {
+        sales = new PlanetsSale[](ids.length);
+        for (uint256 i = 0; i < ids.length; i++) {
+            sales[i] = _sales[ids[i]];
         }
     }
 
-    function onApprovalForAllBy(address owner, bytes calldata data) external {
+    function onApprovalForAllBy(address payable owner, bytes calldata data) external {
         require(msg.sender == address(_outerspace), "APPROVEDBY_EXPECTS_OUTERSPACE");
-        (uint256 location, uint184 pricePerUnit, uint32 spaceshipsToKeep) = abi.decode(
+        (uint256 price, uint256[] memory planets, uint256[] memory minNumSpaceships) = abi.decode(
             data,
-            (uint256, uint184, uint32)
+            (uint256, uint256[], uint256[])
         );
-        _setSpaceshipsForSale(owner, location, pricePerUnit, spaceshipsToKeep);
+        _setSpaceshipsForSale(owner, price, planets, minNumSpaceships);
     }
 
-    function setSpaceshipsForSale(
-        uint256 location,
-        uint184 pricePerUnit,
-        uint32 spaceshipsToKeep
+    function setPlanetsForSale(
+        uint256 price,
+        uint256[] calldata planets,
+        uint256[] calldata minNumSpaceships
     ) external {
-        _setSpaceshipsForSale(msg.sender, location, pricePerUnit, spaceshipsToKeep);
+        _setSpaceshipsForSale(payable(msg.sender), price, planets, minNumSpaceships);
     }
 
-    function cancelSale(uint256 location) external {
-        address currentOwner = _outerspace.ownerOf(location);
-        require(currentOwner == msg.sender, "NOT_PLANET_OWNER");
-        _sales[location].pricePerUnit = 0;
-        _sales[location].spaceshipsToKeep = 0;
-        _sales[location].timestamp = 0;
+    function cancelSale(uint256 id) external {
+        PlanetsSale storage sale = _sales[id];
+        require(sale.seller == msg.sender, "NOT_SELLER");
+        _sales[id].seller = payable(address(0));
+        _sales[id].timestamp = 0;
 
-        emit SaleCancelled(location, currentOwner);
+        emit SaleCancelled(id, msg.sender);
     }
 
-    function purchase(
-        uint256 location,
-        uint32 numSpaceships,
-        address payable fleetSender,
-        bytes32 toHash
-    ) external payable {
-        SpaceshipSale memory sale = _sales[location];
-        (, uint40 ownershipStartTime) = _outerspace.ownerAndOwnershipStartTimeOf(location);
+    function purchase(uint256 id, address newOwner) external payable {
+        PlanetsSale memory sale = _sales[id];
+        require(sale.timestamp > 0, "SALE_OVER");
 
-        require(sale.timestamp > ownershipStartTime, "OWNERSHIP_CHANGED_SALE_OUTDATED");
+        for (uint256 i = 0; i < sale.planets.length; i++) {
+            uint256 location = sale.planets[i];
+            uint256 minSpaceships = sale.minNumSpaceships[i];
+            // (address owner, uint40 ownershipStartTime) = _outerspace.ownerAndOwnershipStartTimeOf(location);
+            IOuterSpace.ExternalPlanet memory planetUpdated = _outerspace.getUpdatedPlanetState(location);
+            require(planetUpdated.owner == sale.seller, "NOT_OWNER");
+            require(sale.timestamp > planetUpdated.ownershipStartTime, "OWNERSHIP_CHANGED_SALE_OUTDATED");
+            require(planetUpdated.numSpaceships >= minSpaceships, "PLANET_LOW_SPACESHIPS");
+            _outerspace.safeTransferFrom(address(this), newOwner, location);
+        }
 
-        uint256 toPay = numSpaceships * sale.pricePerUnit;
+        uint256 toPay = sale.price;
         require(msg.value >= toPay, "NOT_ENOUGH_FUND");
-        fleetSender.transfer(toPay);
+        sale.seller.transfer(toPay);
         if (msg.value > toPay) {
             payable(msg.sender).transfer(msg.value - toPay);
         }
 
-        IOuterSpace.FleetLaunch memory launch;
-        launch.fleetSender = fleetSender; // this is checked by outerspace
-        launch.fleetOwner = msg.sender;
-        launch.from = location;
-        launch.quantity = numSpaceships;
-        launch.toHash = toHash;
-        _outerspace.sendFor(launch);
+        emit PlanetsSold(id, sale.seller, newOwner);
 
-        IOuterSpace.Planet memory planetUpdated = _outerspace.getPlanetState(location);
-
-        // TODO could update OuterSpace.sendFor function to actually specify the amount left, and then pay for that amount if smaller that what wanted
-        require(planetUpdated.numSpaceships >= sale.spaceshipsToKeep, "TOO_MANY_SPACESHIPS_BOUGHT");
-
-        emit SpaceshipsSold(location, msg.sender, numSpaceships);
+        _sales[id].seller = payable(address(0));
+        _sales[id].timestamp = 0;
     }
 
     // ----------------------------------------
@@ -103,17 +101,18 @@ contract BasicPlanetMarket is IApprovalReceiver {
     // ----------------------------------------
 
     function _setSpaceshipsForSale(
-        address seller,
-        uint256 location,
-        uint184 pricePerUnit,
-        uint32 spaceshipsToKeep
+        address payable seller,
+        uint256 price,
+        uint256[] memory planets,
+        uint256[] memory minNumSpaceships
     ) internal {
-        address currentOwner = _outerspace.ownerOf(location);
-        require(currentOwner == seller, "NOT_PLANET_OWNER");
-        _sales[location].pricePerUnit = pricePerUnit;
-        _sales[location].spaceshipsToKeep = spaceshipsToKeep;
-        _sales[location].timestamp = uint40(block.timestamp);
+        uint256 id = ++_counter;
+        _sales[id].timestamp = uint40(block.timestamp);
+        _sales[id].seller = seller;
+        _sales[id].price = price;
+        _sales[id].planets = planets;
+        _sales[id].minNumSpaceships = minNumSpaceships;
 
-        emit SpaceshipsForSale(location, currentOwner, pricePerUnit, spaceshipsToKeep);
+        emit PlanetsForSale(seller, id, price, planets, minNumSpaceships);
     }
 }
