@@ -75,12 +75,23 @@ contract BasicPlanetMarket is IApprovalReceiver {
         for (uint256 i = 0; i < sale.planets.length; i++) {
             uint256 location = sale.planets[i];
             uint256 minSpaceships = sale.minNumSpaceships[i];
-            // (address owner, uint40 ownershipStartTime) = _outerspace.ownerAndOwnershipStartTimeOf(location);
-            IOuterSpace.ExternalPlanet memory planetUpdated = _outerspace.getUpdatedPlanetState(location);
-            require(planetUpdated.owner == sale.seller, "NOT_OWNER");
-            require(sale.timestamp > planetUpdated.ownershipStartTime, "OWNERSHIP_CHANGED_SALE_OUTDATED");
-            require(planetUpdated.numSpaceships >= minSpaceships, "PLANET_LOW_SPACESHIPS");
+
+            // 2 solutions:
+
+            // A) performing checks before :
+            // IOuterSpace.ExternalPlanet memory planetUpdated = _outerspace.getUpdatedPlanetState(location);
+            // require(planetUpdated.owner == sale.seller, "NOT_OWNER");
+            // require(sale.timestamp > planetUpdated.ownershipStartTime, "OWNERSHIP_CHANGED_SALE_OUTDATED");
+            // require(planetUpdated.numSpaceships >= minSpaceships, "PLANET_LOW_SPACESHIPS");
+            // _outerspace.safeTransferFrom(address(this), newOwner, location);
+
+            // B) performing check after
+            (address owner, uint40 ownershipStartTime) = _outerspace.ownerAndOwnershipStartTimeOf(location);
+            require(owner == sale.seller, "NOT_OWNER");
+            require(sale.timestamp > ownershipStartTime, "OWNERSHIP_CHANGED_SALE_OUTDATED");
             _outerspace.safeTransferFrom(address(this), newOwner, location);
+            IOuterSpace.ExternalPlanet memory planetUpdated = _outerspace.getPlanetState(location);
+            require(planetUpdated.numSpaceships >= minSpaceships, "PLANET_LOW_SPACESHIPS"); // TODO what about tax here ?
         }
 
         uint256 toPay = sale.price;
